@@ -16,8 +16,8 @@ class SetorCreation
 
         return DB::transaction(function () use ($data): Setor {
             $setor = Setor::create([
-                'nome' => $data['nome'],
-                'descricao' => $data['descricao'] ?? null,
+                'name' => $data['name'],
+                'description' => $data['description'] ?? null,
             ]);
 
             User::create([
@@ -30,5 +30,6 @@ class SetorCreation
 
             return $setor;
         });
+        //a transaction vai impedir que tu faça uma interação e n faça a outra, resolve o problema do adm + setor brabo
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\UserRole;
 use App\Models\Funcionario;
+use App\Models\Setor;
 use App\Models\Solicitacao;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -31,14 +32,14 @@ class DashboardController extends Controller
         Gate::authorize('viewSuperAdminDashboard', User::class);
 
         return view('dashboard.super-admin', [
+            'setores' => Setor::query()->with([
+                    'admin' => fn ($query) => $query->where('role', UserRole::ADMIN_SETOR),
+                    'funcionarios' => fn ($query) => $query->orderBy('name'),
+                ])->orderBy('name')->get(),
             'totalFuncionarios' => Funcionario::query()->count(),
             'funcionariosExcluidos' => Funcionario::onlyTrashed()->count(),
-            'solicitacoesPendentes' => Solicitacao::query()
-                ->where('status', 'pendente')
-                ->count(),
-            'totalAdminsSetor' => User::query()
-                ->where('role', UserRole::ADMIN_SETOR)
-                ->count(),
+            'solicitacoesPendentes' => Solicitacao::query()->where('status', 'pendente')->count(),
+            'totalAdminsSetor' => User::query()->where('role', UserRole::ADMIN_SETOR)->count(),
         ]);
     }
 

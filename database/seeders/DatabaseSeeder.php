@@ -88,5 +88,95 @@ class DatabaseSeeder extends Seeder
             'cargo_id' => $assistente->id,
             'setor_id' => $setor->id,
         ]);
+
+        $setorFinanceiro = Setor::updateOrCreate([
+            'name' => 'Financeiro',
+        ], [
+            'description' => 'Setor responsavel por pagamentos, orcamentos e controles financeiros.',
+        ]);
+
+        $analistaFinanceiro = Cargo::updateOrCreate([
+            'name' => 'Analista Financeiro',
+        ], [
+            'description' => 'Acompanha contas, lancamentos e relatorios financeiros.',
+            'hierarchy' => 2,
+        ]);
+
+        $coordenadorFinanceiro = Cargo::updateOrCreate([
+            'name' => 'Coordenador Financeiro',
+        ], [
+            'description' => 'Coordena rotinas financeiras e acompanha indicadores do setor.',
+            'hierarchy' => 3,
+        ]);
+
+        User::updateOrCreate([
+            'email' => 'admin.financeiro@sgf.com',
+        ], [
+            'name' => 'Admin Financeiro',
+            'password' => Hash::make('password'),
+            'role' => UserRole::ADMIN_SETOR,
+            'setor_id' => $setorFinanceiro->id,
+        ]);
+
+        Funcionario::updateOrCreate([
+            'name' => 'Bruno Martins',
+        ], [
+            'salary' => 4800,
+            'cargo_id' => $analistaFinanceiro->id,
+            'setor_id' => $setorFinanceiro->id,
+        ]);
+
+        Funcionario::updateOrCreate([
+            'name' => 'Juliana Rocha',
+        ], [
+            'salary' => 7200,
+            'cargo_id' => $coordenadorFinanceiro->id,
+            'setor_id' => $setorFinanceiro->id,
+        ]);
+
+        $setorTecnologia = Setor::updateOrCreate([
+            'name' => 'Tecnologia',
+        ], [
+            'description' => 'Setor responsavel por sistemas, suporte tecnico e infraestrutura.',
+        ]);
+
+        $desenvolvedor = Cargo::updateOrCreate([
+            'name' => 'Desenvolvedor',
+        ], [
+            'description' => 'Desenvolve e mantem sistemas internos da empresa.',
+            'hierarchy' => 2,
+        ]);
+
+        $suporteTecnico = Cargo::updateOrCreate([
+            'name' => 'Suporte Tecnico',
+        ], [
+            'description' => 'Atende chamados e apoia usuarios nos recursos de tecnologia.',
+            'hierarchy' => 1,
+        ]);
+
+        User::updateOrCreate([
+            'email' => 'admin.tecnologia@sgf.com',
+        ], [
+            'name' => 'Admin Tecnologia',
+            'password' => Hash::make('password'),
+            'role' => UserRole::ADMIN_SETOR,
+            'setor_id' => $setorTecnologia->id,
+        ]);
+
+        Funcionario::updateOrCreate([
+            'name' => 'Pedro Almeida',
+        ], [
+            'salary' => 5600,
+            'cargo_id' => $desenvolvedor->id,
+            'setor_id' => $setorTecnologia->id,
+        ]);
+
+        Funcionario::updateOrCreate([
+            'name' => 'Fernanda Dias',
+        ], [
+            'salary' => 3600,
+            'cargo_id' => $suporteTecnico->id,
+            'setor_id' => $setorTecnologia->id,
+        ]);
     }
 }

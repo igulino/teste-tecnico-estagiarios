@@ -14,9 +14,9 @@ class SetoresRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nome' => ['required', 'string', 'max:255', 'unique:setores,nome'],
+            'name' => ['required', 'string', 'max:255', 'unique:setores,name'],
 
-            'descricao' => [
+            'description' => [
                 'nullable',
                 'string',
                 'max:2000',
