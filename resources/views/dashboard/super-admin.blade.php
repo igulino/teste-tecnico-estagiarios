@@ -57,7 +57,13 @@
                         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                             <div class="flex min-h-64 flex-col p-6">
                                 <div>
-                                    <h4 class="text-xl font-semibold text-gray-900">{{ $setor->name }}</h4>
+                                    <div class="flex items-start justify-between gap-3">
+                                        <h4 class="text-xl font-semibold text-gray-900">{{ $setor->name }}</h4>
+
+                                        <a href="{{ route('funcionarios.create', $setor) }}" class="shrink-0 rounded-md border border-gray-300 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 transition hover:bg-gray-50">
+                                            Criar funcionario
+                                        </a>
+                                    </div>
 
                                     @if ($setor->description)
                                         <p class="mt-2 text-sm text-gray-500">{{ $setor->description }}</p>

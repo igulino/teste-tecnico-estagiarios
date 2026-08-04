@@ -51,16 +51,9 @@ class DashboardController extends Controller
 
         return view('dashboard.admin-setor', [
             'setor' => $user->setor,
-            'totalFuncionarios' => Funcionario::query()
-                ->where('setor_id', $user->setor_id)
-                ->count(),
-            'solicitacoesPendentes' => Solicitacao::query()
-                ->where('setor_aprovador_id', $user->setor_id)
-                ->where('status', 'pendente')
-                ->count(),
-            'solicitacoesDecididas' => Solicitacao::query()
-                ->where('decidido_por_user_id', $user->id)
-                ->count(),
+            'totalFuncionarios' => Funcionario::query()->where('setor_id', $user->setor_id)->count(),
+            'solicitacoesPendentes' => Solicitacao::query()->where('setor_aprovador_id', $user->setor_id)->where('status', 'pendente')->count(),
+            'solicitacoesDecididas' => Solicitacao::query()->where('decidido_por_user_id', $user->id)->count(),
         ]);
     }
 }

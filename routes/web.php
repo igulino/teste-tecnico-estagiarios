@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FuncionarioController;
 use App\Http\Controllers\SetorController;
 use Illuminate\Support\Facades\Route;
 
@@ -15,6 +16,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard/admin-setor', [DashboardController::class, 'adminSetor'])->name('dashboard.admin-setor');
     Route::get('/setores/create', [SetorController::class, 'create'])->name('setores.create');
     Route::post('/setores', [SetorController::class, 'store'])->name('setores.store');
+    Route::get('/setores/{setor}/funcionarios/create', [FuncionarioController::class, 'create'])->name('funcionarios.create');
+    Route::post('/setores/{setor}/funcionarios', [FuncionarioController::class, 'store'])->name('funcionarios.store');
 });
 
 Route::middleware('auth')->group(function () {

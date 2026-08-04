@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\Funcionario;
 use App\Models\Setor;
 use App\Models\Solicitacao;
 use App\Models\User;
+use App\Policies\FuncionarioPolicy;
 use App\Policies\SetorPolicy;
 use App\Policies\SolicitacaoPolicy;
 use App\Policies\UserPolicy;
@@ -26,6 +28,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::policy(Funcionario::class, FuncionarioPolicy::class);
         Gate::policy(Setor::class, SetorPolicy::class);
         Gate::policy(Solicitacao::class, SolicitacaoPolicy::class);
         Gate::policy(User::class, UserPolicy::class);
