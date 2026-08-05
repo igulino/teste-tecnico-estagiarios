@@ -11,4 +11,15 @@ class FuncionarioPolicy
     {
         return $user->role === UserRole::SUPER_ADMIN;
     }
+
+    public function delete(User $user): bool
+    {
+        return $user->role === UserRole::SUPER_ADMIN;
+    }
+
+    public function update(User $user): bool
+    {
+        return $user->role === UserRole::SUPER_ADMIN;
+    }
+
 }

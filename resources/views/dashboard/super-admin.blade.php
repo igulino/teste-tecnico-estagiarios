@@ -83,8 +83,38 @@
                                     @if ($setor->funcionarios->isNotEmpty())
                                         <ul class="mt-2 space-y-2">
                                             @foreach ($setor->funcionarios as $funcionario)
-                                                <li class="rounded border border-gray-200 px-3 py-2 text-sm text-gray-700">
-                                                    {{ $funcionario->name }}
+                                                <li x-data="{ aberto: false }" class="rounded border border-gray-200 px-3 py-2 text-sm text-gray-700">
+                                                    <div class="flex items-center justify-between gap-3">
+                                                        <button type="button" x-on:click="aberto = ! aberto" class="text-left font-medium text-gray-800 hover:text-gray-950">
+                                                            {{ $funcionario->name }}
+                                                        </button>
+
+                                                        <form method="POST" action="{{ route('funcionarios.destroy', $funcionario) }}" onsubmit="return confirm('Tem certeza que deseja excluir este funcionario?')">
+                                                            @csrf
+                                                            @method('DELETE')
+
+                                                            <button type="submit" class="text-xs font-semibold uppercase tracking-widest text-red-600 hover:text-red-800">
+                                                                Excluir
+                                                            </button>
+                                                        </form>
+                                                    </div>
+
+                                                    <form x-show="aberto" x-cloak method="POST" action="{{ route('funcionarios.transfer', $funcionario) }}" class="mt-3 flex flex-col gap-2 sm:flex-row">
+                                                        @csrf
+                                                        @method('PATCH')
+
+                                                        <select name="setor_id" class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                                            @foreach ($setores as $setorOpcao)
+                                                                <option value="{{ $setorOpcao->id }}" @selected($funcionario->setor_id === $setorOpcao->id)>
+                                                                    {{ $setorOpcao->name }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+
+                                                        <button type="submit" class="rounded-md bg-gray-800 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-gray-700">
+                                                            Mudar
+                                                        </button>
+                                                    </form>
                                                 </li>
                                             @endforeach
                                         </ul>

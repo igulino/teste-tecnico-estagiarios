@@ -18,23 +18,13 @@ return new class extends Migration
             $table->string('tipo');
             $table->string('status')->default('pendente');
 
-            $table->foreignId('funcionario_id')
-                ->constrained('funcionarios');
-
-            $table->foreignId('solicitado_por_user_id')
-                ->constrained('users');
-
-            $table->foreignId('decidido_por_user_id')
-                ->nullable()
-                ->constrained('users');
-
-            $table->foreignId('setor_aprovador_id')
-                ->constrained('setores');
+            $table->foreignId('funcionario_id')->constrained('funcionarios');
+            $table->foreignId('solicitado_por_user_id')->constrained('users');
+            $table->foreignId('decidido_por_user_id')->nullable()->constrained('users');
+            $table->foreignId('setor_aprovador_id')->nullable()->constrained('setores');
 
             // Transferência
-            $table->foreignId('setor_origem_id')
-                ->nullable()
-                ->constrained('setores');
+            $table->foreignId('setor_origem_id')->nullable()->constrained('setores');
 
             $table->foreignId('setor_destino_id')
                 ->nullable()
@@ -45,13 +35,9 @@ return new class extends Migration
             $table->decimal('salario_proposto', 10, 2)->nullable();
 
             // Promoção
-            $table->foreignId('cargo_atual_id')
-                ->nullable()
-                ->constrained('cargos');
+            $table->foreignId('cargo_atual_id')->nullable()->constrained('cargos');
 
-            $table->foreignId('cargo_proposto_id')
-                ->nullable()
-                ->constrained('cargos');
+            $table->foreignId('cargo_proposto_id')->nullable()->constrained('cargos');
 
             $table->text('motivo_solicitacao')->nullable();
             $table->text('justificativa_decisao')->nullable();

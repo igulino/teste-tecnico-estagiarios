@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\SolicitacaoStatus;
+use App\Enums\SolicitacaoTipo;
 use App\Enums\UserRole;
 use App\Models\Funcionario;
 use App\Models\Setor;
@@ -33,9 +35,9 @@ class DashboardController extends Controller
 
         return view('dashboard.super-admin', [
             'setores' => Setor::query()->with([
-                    'admin' => fn ($query) => $query->where('role', UserRole::ADMIN_SETOR),
-                    'funcionarios' => fn ($query) => $query->orderBy('name'),
-                ])->orderBy('name')->get(),
+                'admin' => fn ($query) => $query->where('role', UserRole::ADMIN_SETOR),
+                'funcionarios' => fn ($query) => $query->orderBy('name'),
+            ])->orderBy('name')->get(),
             'totalFuncionarios' => Funcionario::query()->count(),
             'funcionariosExcluidos' => Funcionario::onlyTrashed()->count(),
             'solicitacoesPendentes' => Solicitacao::query()->where('status', 'pendente')->count(),
@@ -51,6 +53,14 @@ class DashboardController extends Controller
 
         return view('dashboard.admin-setor', [
             'setor' => $user->setor,
+            'setores' => Setor::query()->where('id', '!=', $user->setor_id)->orderBy('name')->get(),
+            'funcionarios' => Funcionario::query()->with('cargo')->where('setor_id', $user->setor_id)->orderBy('name')->get(),
+            'funcionariosComTransferenciaPendente' => Solicitacao::query()
+                ->where('tipo', SolicitacaoTipo::TRANSFERENCIA->value)
+                ->where('status', SolicitacaoStatus::PENDENTE->value)
+                ->where('setor_origem_id', $user->setor_id)
+                ->pluck('funcionario_id')
+                ->all(),
             'totalFuncionarios' => Funcionario::query()->where('setor_id', $user->setor_id)->count(),
             'solicitacoesPendentes' => Solicitacao::query()->where('setor_aprovador_id', $user->setor_id)->where('status', 'pendente')->count(),
             'solicitacoesDecididas' => Solicitacao::query()->where('decidido_por_user_id', $user->id)->count(),
