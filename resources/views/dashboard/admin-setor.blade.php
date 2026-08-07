@@ -61,6 +61,69 @@
                 </div>
             </div>
 
+            <div class="mt-6 bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold text-gray-900">Solicitacoes recebidas</h3>
+
+                    @if ($solicitacoesRecebidas->isNotEmpty())
+                        <div class="mt-4 overflow-hidden rounded-md border border-gray-200">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Tipo</th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Funcionario</th>
+                                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Acoes</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 bg-white">
+                                    @foreach ($solicitacoesRecebidas as $solicitacao)
+                                        <tr>
+                                            <td class="px-4 py-3 text-sm">
+                                                <span class="font-medium {{ $solicitacao->status->value === 'pendente' ? 'text-amber-600' : 'text-gray-700' }}">
+                                                    {{ ucfirst($solicitacao->status->value) }}
+                                                </span>
+                                            </td>
+                                            <td class="px-4 py-3 text-sm text-gray-600">
+                                                {{ ucfirst($solicitacao->tipo->value) }}
+                                            </td>
+                                            <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                                                {{ $solicitacao->funcionario?->name ?? 'Funcionario removido' }}
+                                            </td>
+                                            <td class="px-4 py-3 text-right text-sm">
+                                                @if ($solicitacao->status->value === 'pendente')
+                                                    <div class="flex justify-end gap-2">
+                                                        <form method="POST" action="{{ route('solicitacoes.accept', $solicitacao) }}">
+                                                            @csrf
+
+                                                            <button type="submit" class="rounded-md bg-gray-800 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-gray-700">
+                                                                Aceitar
+                                                            </button>
+                                                        </form>
+
+                                                        <form method="POST" action="{{ route('solicitacoes.reject', $solicitacao) }}">
+                                                            @csrf
+
+                                                            <button type="submit" class="rounded-md border border-red-300 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-red-600 transition hover:bg-red-50">
+                                                                Recusar
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                @else
+                                                    <span class="text-sm text-gray-500">Decidida</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <p class="mt-4 text-sm text-gray-500">Nenhuma solicitacao recebida ainda.</p>
+                    @endif
+                </div>
+            </div>
+
             <div class="admin-setor-panels mt-6">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
@@ -82,22 +145,35 @@
                                                         {{ $funcionario->name }}
                                                     </button>
 
-                                                    <form x-show="aberto" x-cloak method="POST" action="{{ route('solicitacoes.transferencia.store') }}" class="mt-3 flex flex-col gap-2">
-                                                        @csrf
-                                                        <input type="hidden" name="funcionario_id" value="{{ $funcionario->id }}">
+                                                    <div x-show="aberto" x-cloak class="mt-3 grid gap-3 lg:grid-cols-2">
+                                                        <form method="POST" action="{{ route('solicitacoes.transferencia.store') }}" class="flex flex-col gap-2">
+                                                            @csrf
+                                                            <input type="hidden" name="funcionario_id" value="{{ $funcionario->id }}">
 
-                                                        <select name="setor_destino_id" class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                                            @foreach ($setores as $setorOpcao)
-                                                                <option value="{{ $setorOpcao->id }}">
-                                                                    {{ $setorOpcao->name }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
+                                                            <select name="setor_destino_id" class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                                                @foreach ($setores as $setorOpcao)
+                                                                    <option value="{{ $setorOpcao->id }}">
+                                                                        {{ $setorOpcao->name }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
 
-                                                        <button type="submit" class="rounded-md bg-gray-800 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-gray-700">
-                                                            Solicitar transferencia
-                                                        </button>
-                                                    </form>
+                                                            <button type="submit" class="rounded-md bg-gray-800 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-gray-700">
+                                                                Solicitar transferencia
+                                                            </button>
+                                                        </form>
+
+                                                        <form method="POST" action="{{ route('solicitacoes.aumento.store') }}" class="flex flex-col gap-2">
+                                                            @csrf
+                                                            <input type="hidden" name="funcionario_id" value="{{ $funcionario->id }}">
+
+                                                            <input name="salario_proposto" type="number" min="0" step="0.01" placeholder="Novo salario" class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+
+                                                            <button type="submit" class="rounded-md border border-gray-300 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 transition hover:bg-gray-50">
+                                                                Solicitar aumento
+                                                            </button>
+                                                        </form>
+                                                    </div>
                                                 </td>
                                                 <td class="px-4 py-3 text-sm text-gray-600">{{ $funcionario->cargo?->name ?? 'Sem cargo vinculado' }}</td>
                                             </tr>
@@ -115,14 +191,38 @@
                     <div class="p-6">
                         <h3 class="text-lg font-semibold text-gray-900">Solicitacoes feitas</h3>
 
-                        <div class="mt-4 rounded-md border border-gray-200 p-4">
-                            <div class="text-sm font-medium text-gray-500">Pendentes neste setor</div>
-                            <div class="mt-2 text-3xl font-semibold text-gray-900">{{ $solicitacoesPendentes }}</div>
-                        </div>
-
-                        <p class="mt-4 text-sm text-gray-500">
-                            Espaco reservado para listar as solicitacoes criadas ou acompanhadas por este setor.
-                        </p>
+                        @if ($solicitacoesFeitas->isNotEmpty())
+                            <div class="mt-4 overflow-hidden rounded-md border border-gray-200">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
+                                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Tipo</th>
+                                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Funcionario</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200 bg-white">
+                                        @foreach ($solicitacoesFeitas as $solicitacao)
+                                            <tr>
+                                                <td class="px-4 py-3 text-sm">
+                                                    <span class="font-medium {{ $solicitacao->status->value === 'pendente' ? 'text-amber-600' : 'text-gray-700' }}">
+                                                        {{ ucfirst($solicitacao->status->value) }}
+                                                    </span>
+                                                </td>
+                                                <td class="px-4 py-3 text-sm text-gray-600">
+                                                    {{ ucfirst($solicitacao->tipo->value) }}
+                                                </td>
+                                                <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                                                    {{ $solicitacao->funcionario?->name ?? 'Funcionario removido' }}
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <p class="mt-4 text-sm text-gray-500">Nenhuma solicitacao feita ainda.</p>
+                        @endif
                     </div>
                 </div>
             </div>

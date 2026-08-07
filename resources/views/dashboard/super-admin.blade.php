@@ -5,8 +5,8 @@
                 Dashboard do Super Admin
             </h2>
 
-            <a href="{{ route('setores.create') }}" class="inline-flex items-center rounded-md border border-transparent bg-gray-800 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out hover:bg-gray-700 focus:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-900">
-                Criar setor
+            <a href="{{ route('solicitacoes.index') }}" class="inline-flex items-center rounded-md border border-gray-300 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 transition hover:bg-gray-50">
+                Ver solicitacoes
             </a>
         </div>
     </x-slot>
@@ -50,7 +50,19 @@
             </div>
 
             <div class="mt-8">
-                <h3 class="text-lg font-semibold text-gray-900">Setores cadastrados</h3>
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900">Setores cadastrados</h3>
+
+                    <div class="flex gap-2">
+                        <a href="{{ route('cargos.create') }}" class="inline-flex items-center rounded-md border border-gray-300 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 transition hover:bg-gray-50">
+                            Criar cargo
+                        </a>
+
+                        <a href="{{ route('setores.create') }}" class="inline-flex items-center rounded-md border border-transparent bg-gray-800 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out hover:bg-gray-700 focus:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-900">
+                            Criar setor
+                        </a>
+                    </div>
+                </div>
 
                 <div class="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     @forelse ($setores as $setor)

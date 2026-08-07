@@ -33,13 +33,33 @@ class SolicitacaoDecision
         });
     }
 
+    public function solicitarAumento(User $actor, array $data): Solicitacao
+    {
+        Gate::forUser($actor)->authorize('create', Solicitacao::class);
+
+        return DB::transaction(function () use ($actor, $data): Solicitacao {
+            $funcionario = Funcionario::query()->findOrFail($data['funcionario_id']);
+
+            return Solicitacao::create([
+                'tipo' => SolicitacaoTipo::AUMENTO->value,
+                'status' => SolicitacaoStatus::PENDENTE->value,
+                'funcionario_id' => $funcionario->id,
+                'solicitado_por_user_id' => $actor->id,
+                'setor_aprovador_id' => $funcionario->setor_id,
+                'setor_origem_id' => $funcionario->setor_id,
+                'salario_atual' => $funcionario->salary,
+                'salario_proposto' => $data['salario_proposto'],
+            ]);
+        });
+    }
+
     public function execute(User $actor, Solicitacao $solicitacao, string $justificativa): void
     {
         Gate::forUser($actor)->authorize('decide', $solicitacao);
 
         DB::transaction(function () use ($actor, $solicitacao, $justificativa) {
             $solicitacao = Solicitacao::query()->lockForUpdate()->findOrFail($solicitacao->id);
-
+            
             if ($solicitacao->status !== SolicitacaoStatus::PENDENTE) {
                 throw new RuntimeException('Solicitacao ja decidida.');
             }
@@ -73,8 +93,30 @@ class SolicitacaoDecision
         });
     }
 
+    public function reject(User $actor, Solicitacao $solicitacao, string $justificativa): void
+    {
+        Gate::forUser($actor)->authorize('decide', $solicitacao);
+
+        DB::transaction(function () use ($actor, $solicitacao, $justificativa) {
+            $solicitacao = Solicitacao::query()->lockForUpdate()->findOrFail($solicitacao->id);
+
+            if ($solicitacao->status !== SolicitacaoStatus::PENDENTE) {
+                throw new RuntimeException('Solicitacao ja decidida.');
+            }
+
+            $solicitacao->update([
+                'status' => SolicitacaoStatus::REPROVADA,
+                'decidido_por_user_id' => $actor->id,
+                'justificativa_decisao' => $justificativa,
+                'decidido_em' => now(),
+            ]);
+        });
+    }
+
     private function aplicarTransferencia(Solicitacao $solicitacao, User $actor): void
     {
+        Gate::forUser($actor)->authorize('decide', $solicitacao);
+
         $funcionario = Funcionario::query()->lockForUpdate()->findOrFail($solicitacao->funcionario_id);
         $setorOrigemId = $funcionario->setor_id;
         $funcionario->update([
@@ -83,7 +125,7 @@ class SolicitacaoDecision
 
         Historico::create([
             'tipo' => SolicitacaoTipo::TRANSFERENCIA->value,
-            'contexto' => 'Transferencia aprovada por solicitacao de ' . User::query()->where('id', $solicitacao->solicitado_por_user_id)->value('name'),
+            'contexto' => 'Transferencia aprovada por ' . $actor->name . ' pela solicitacao de ' . User::query()->where('id', $solicitacao->solicitado_por_user_id)->value('name'),
             'funcionario_id' => $funcionario->id,
             'solicitacao_id' => $solicitacao->id,
             'executado_por_user_id' => $actor->id,
