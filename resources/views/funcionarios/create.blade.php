@@ -5,7 +5,7 @@
                 Criar funcionario
             </h2>
 
-            <a href="{{ route('dashboard.super-admin') }}" class="text-sm font-medium text-gray-600 hover:text-gray-900">
+            <a href="{{ route('dashboard') }}" class="text-sm font-medium text-gray-600 hover:text-gray-900">
                 Voltar
             </a>
         </div>
@@ -48,7 +48,7 @@
                     </div>
 
                     <div class="mt-8 flex items-center justify-end gap-3">
-                        <a href="{{ route('dashboard.super-admin') }}" class="text-sm font-medium text-gray-600 hover:text-gray-900">
+                        <a href="{{ route('dashboard') }}" class="text-sm font-medium text-gray-600 hover:text-gray-900">
                             Cancelar
                         </a>
 

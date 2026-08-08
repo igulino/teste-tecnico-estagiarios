@@ -57,6 +57,24 @@
                                                 R$ {{ number_format((float) $solicitacao->salario_atual, 2, ',', '.') }} para R$ {{ number_format((float) $solicitacao->salario_proposto, 2, ',', '.') }}
                                             </div>
                                         @endif
+
+                                        <div class="mt-4 flex gap-2">
+                                            <form method="POST" action="{{ route('solicitacoes.accept', $solicitacao) }}">
+                                                @csrf
+
+                                                <button type="submit" class="rounded-md bg-gray-800 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-gray-700">
+                                                    Aceitar
+                                                </button>
+                                            </form>
+
+                                            <form method="POST" action="{{ route('solicitacoes.reject', $solicitacao) }}">
+                                                @csrf
+
+                                                <button type="submit" class="rounded-md border border-red-300 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-red-600 transition hover:bg-red-50">
+                                                    Recusar
+                                                </button>
+                                            </form>
+                                        </div>
                                     </div>
                                 @endforeach
                                 </div>

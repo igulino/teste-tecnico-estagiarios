@@ -53,6 +53,26 @@ class SolicitacaoDecision
         });
     }
 
+    public function solicitarPromocao(User $actor, array $data): Solicitacao
+    {
+        Gate::forUser($actor)->authorize('create', Solicitacao::class);
+
+        return DB::transaction(function () use ($actor, $data): Solicitacao {
+            $funcionario = Funcionario::query()->findOrFail($data['funcionario_id']);
+
+            return Solicitacao::create([
+                'tipo' => SolicitacaoTipo::PROMOCAO->value,
+                'status' => SolicitacaoStatus::PENDENTE->value,
+                'funcionario_id' => $funcionario->id,
+                'solicitado_por_user_id' => $actor->id,
+                'setor_aprovador_id' => $funcionario->setor_id,
+                'setor_origem_id' => $funcionario->setor_id,
+                'cargo_atual_id' => $funcionario->cargo_id,
+                'cargo_proposto_id' => $data['cargo_proposto_id'],
+            ]);
+        });
+    }
+
     public function execute(User $actor, Solicitacao $solicitacao, string $justificativa): void
     {
         Gate::forUser($actor)->authorize('decide', $solicitacao);
@@ -104,12 +124,61 @@ class SolicitacaoDecision
                 throw new RuntimeException('Solicitacao ja decidida.');
             }
 
+            $funcionario = Funcionario::query()->findOrFail($solicitacao->funcionario_id);
+
             $solicitacao->update([
-                'status' => SolicitacaoStatus::REPROVADA,
+                'status' => SolicitacaoStatus::REPROVADA,   
                 'decidido_por_user_id' => $actor->id,
                 'justificativa_decisao' => $justificativa,
                 'decidido_em' => now(),
             ]);
+
+            Historico::create([
+                'tipo' => $solicitacao->tipo->value,
+                'contexto' => 'Solicitacao recusada por ' . $actor->name . '.',
+                'funcionario_id' => $funcionario->id,
+                'solicitacao_id' => $solicitacao->id,
+                'executado_por_user_id' => $actor->id,
+                'setor_origem_id' => $solicitacao->setor_origem_id,
+                'setor_destino_id' => $solicitacao->setor_destino_id,
+                'salario_anterior' => $solicitacao->salario_atual,
+                'salario_novo' => $solicitacao->salario_proposto,
+                'cargo_anterior_id' => $solicitacao->cargo_atual_id,
+                'cargo_novo_id' => $solicitacao->cargo_proposto_id,
+                'nome_funcionario_snapshot' => $funcionario->name,
+            ]);
+        });
+    }
+
+    public function undo(User $actor, Solicitacao $solicitacao): void
+    {
+        Gate::forUser($actor)->authorize('delete', $solicitacao);
+
+        DB::transaction(function () use ($actor, $solicitacao) {
+            $solicitacao = Solicitacao::query()->lockForUpdate()->findOrFail($solicitacao->id);
+
+            if ($solicitacao->status !== SolicitacaoStatus::PENDENTE) {
+                throw new RuntimeException('Apenas solicitacoes pendentes podem ser desfeitas.');
+            }
+
+            $funcionario = Funcionario::query()->findOrFail($solicitacao->funcionario_id);
+
+            Historico::create([
+                'tipo' => $solicitacao->tipo->value,
+                'contexto' => 'Solicitacao desfeita por ' . $actor->name . '.',
+                'funcionario_id' => $funcionario->id,
+                'solicitacao_id' => null,
+                'executado_por_user_id' => $actor->id,
+                'setor_origem_id' => $solicitacao->setor_origem_id,
+                'setor_destino_id' => $solicitacao->setor_destino_id,
+                'salario_anterior' => $solicitacao->salario_atual,
+                'salario_novo' => $solicitacao->salario_proposto,
+                'cargo_anterior_id' => $solicitacao->cargo_atual_id,
+                'cargo_novo_id' => $solicitacao->cargo_proposto_id,
+                'nome_funcionario_snapshot' => $funcionario->name,
+            ]);
+
+            $solicitacao->delete();
         });
     }
 
@@ -146,7 +215,7 @@ class SolicitacaoDecision
 
         Historico::create([
             'tipo' => SolicitacaoTipo::AUMENTO->value,
-            'contexto' => 'Aumento salarial aprovado por solicitacao.',
+            'contexto' => 'Aumento salarial aprovado por ' . $actor->name . '.',
             'funcionario_id' => $funcionario->id,
             'solicitacao_id' => $solicitacao->id,
             'executado_por_user_id' => $actor->id,

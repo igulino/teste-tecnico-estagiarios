@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\SolicitacaoStatus;
 use App\Enums\SolicitacaoTipo;
 use App\Enums\UserRole;
+use App\Models\Cargo;
 use App\Models\Funcionario;
 use App\Models\Setor;
 use App\Models\Solicitacao;
@@ -54,6 +55,7 @@ class DashboardController extends Controller
         return view('dashboard.admin-setor', [
             'setor' => $user->setor,
             'setores' => Setor::query()->where('id', '!=', $user->setor_id)->orderBy('name')->get(),
+            'cargos' => Cargo::query()->orderBy('hierarchy')->orderBy('name')->get(),
             'funcionarios' => Funcionario::query()->with('cargo')->where('setor_id', $user->setor_id)->orderBy('name')->get(),
             'funcionariosComTransferenciaPendente' => Solicitacao::query()
                 ->where('tipo', SolicitacaoTipo::TRANSFERENCIA->value)

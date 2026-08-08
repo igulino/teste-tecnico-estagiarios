@@ -23,6 +23,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/cargos/create', [CargoController::class, 'create'])->name('cargos.create');
     Route::post('/cargos', [CargoController::class, 'store'])->name('cargos.store');
 
+    Route::get('/funcionarios/excluidos', [FuncionarioController::class, 'excluded'])->name('funcionarios.excluded');
+    Route::post('/funcionarios/{funcionario}/restaurar', [FuncionarioController::class, 'restore'])->name('funcionarios.restore');
     Route::get('/setores/{setor}/funcionarios/create', [FuncionarioController::class, 'create'])->name('funcionarios.create');
     Route::post('/setores/{setor}/funcionarios', [FuncionarioController::class, 'store'])->name('funcionarios.store');
     Route::patch('/funcionarios/{funcionario}/setor', [FuncionarioController::class, 'transfer'])->name('funcionarios.transfer');
@@ -31,8 +33,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/solicitacoes', [SolicitacoesController::class, 'index'])->name('solicitacoes.index');
     Route::post('/solicitacoes/transferencia', [SolicitacoesController::class, 'storeTransferencia'])->name('solicitacoes.transferencia.store');
     Route::post('/solicitacoes/aumento', [SolicitacoesController::class, 'storeAumento'])->name('solicitacoes.aumento.store');
+    Route::post('/solicitacoes/promocao', [SolicitacoesController::class, 'storePromocao'])->name('solicitacoes.promocao.store');
     Route::post('/solicitacoes/{solicitacao}/aceitar', [SolicitacoesController::class, 'accept'])->name('solicitacoes.accept');
     Route::post('/solicitacoes/{solicitacao}/recusar', [SolicitacoesController::class, 'reject'])->name('solicitacoes.reject');
+    Route::delete('/solicitacoes/{solicitacao}', [SolicitacoesController::class, 'destroy'])->name('solicitacoes.destroy');
 });
 
 Route::middleware('auth')->group(function () {

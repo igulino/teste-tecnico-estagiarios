@@ -13,9 +13,15 @@
     </style>
 
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Dashboard do Admin de Setor
-        </h2>
+        <div class="flex items-center justify-between">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                Dashboard do Admin de Setor
+            </h2>
+
+            <a href="{{ route('funcionarios.excluded') }}" class="inline-flex items-center rounded-md border border-gray-300 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 transition hover:bg-gray-50">
+                Desfazer exclusao
+            </a>
+        </div>
     </x-slot>
 
     <div class="py-12">
@@ -127,12 +133,27 @@
             <div class="admin-setor-panels mt-6">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
-                        <h3 class="text-lg font-semibold text-gray-900">Funcionarios do setor</h3>
+                        <div class="flex items-center justify-between gap-3">
+                            <h3 class="text-lg font-semibold text-gray-900">Funcionarios do setor</h3>
+
+                            @if ($setor)
+                                <a href="{{ route('funcionarios.create', $setor) }}" class="shrink-0 rounded-md border border-gray-300 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 transition hover:bg-gray-50">
+                                    Criar funcionario
+                                </a>
+                            @endif
+                        </div>
 
                         @if ($funcionarios->isNotEmpty())
                             <div class="mt-4 overflow-hidden rounded-md border border-gray-200">
                                 <table class="min-w-full divide-y divide-gray-200">
-                                   
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Funcionario</th>
+                                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Cargo</th>
+                                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Salario</th>
+                                            <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Acoes</th>
+                                        </tr>
+                                    </thead>
                                     <tbody class="divide-y divide-gray-200 bg-white">
                                         @foreach ($funcionarios as $funcionario)
                                             @php
@@ -145,7 +166,7 @@
                                                         {{ $funcionario->name }}
                                                     </button>
 
-                                                    <div x-show="aberto" x-cloak class="mt-3 grid gap-3 lg:grid-cols-2">
+                                                    <div x-show="aberto" x-cloak class="mt-3 grid gap-3 lg:grid-cols-3">
                                                         <form method="POST" action="{{ route('solicitacoes.transferencia.store') }}" class="flex flex-col gap-2">
                                                             @csrf
                                                             <input type="hidden" name="funcionario_id" value="{{ $funcionario->id }}">
@@ -173,9 +194,37 @@
                                                                 Solicitar aumento
                                                             </button>
                                                         </form>
+
+                                                        <form method="POST" action="{{ route('solicitacoes.promocao.store') }}" class="flex flex-col gap-2">
+                                                            @csrf
+                                                            <input type="hidden" name="funcionario_id" value="{{ $funcionario->id }}">
+
+                                                            <select name="cargo_proposto_id" class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                                                @foreach ($cargos as $cargoOpcao)
+                                                                    <option value="{{ $cargoOpcao->id }}" @selected($funcionario->cargo_id === $cargoOpcao->id)>
+                                                                        {{ $cargoOpcao->name }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+
+                                                            <button type="submit" class="rounded-md border border-gray-300 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 transition hover:bg-gray-50">
+                                                                Solicitar cargo
+                                                            </button>
+                                                        </form>
                                                     </div>
                                                 </td>
                                                 <td class="px-4 py-3 text-sm text-gray-600">{{ $funcionario->cargo?->name ?? 'Sem cargo vinculado' }}</td>
+                                                <td class="px-4 py-3 text-sm text-gray-600">R$ {{ number_format((float) $funcionario->salary, 2, ',', '.') }}</td>
+                                                <td class="px-4 py-3 text-right text-sm">
+                                                    <form method="POST" action="{{ route('funcionarios.destroy', $funcionario) }}" onsubmit="return confirm('Tem certeza que deseja excluir este funcionario?')">
+                                                        @csrf
+                                                        @method('DELETE')
+
+                                                        <button type="submit" class="rounded-md border border-red-300 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-red-600 transition hover:bg-red-50">
+                                                            Excluir
+                                                        </button>
+                                                    </form>
+                                                </td>
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -199,6 +248,7 @@
                                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
                                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Tipo</th>
                                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Funcionario</th>
+                                            <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Acoes</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-200 bg-white">
@@ -214,6 +264,20 @@
                                                 </td>
                                                 <td class="px-4 py-3 text-sm font-medium text-gray-900">
                                                     {{ $solicitacao->funcionario?->name ?? 'Funcionario removido' }}
+                                                </td>
+                                                <td class="px-4 py-3 text-right text-sm">
+                                                    @if ($solicitacao->status->value === 'pendente')
+                                                        <form method="POST" action="{{ route('solicitacoes.destroy', $solicitacao) }}" onsubmit="return confirm('Tem certeza que deseja desfazer esta solicitacao?')">
+                                                            @csrf
+                                                            @method('DELETE')
+
+                                                            <button type="submit" class="rounded-md border border-red-300 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-red-600 transition hover:bg-red-50">
+                                                                Desfazer
+                                                            </button>
+                                                        </form>
+                                                    @else
+                                                        <span class="text-sm text-gray-500">Decidida</span>
+                                                    @endif
                                                 </td>
                                             </tr>
                                         @endforeach
