@@ -10,6 +10,7 @@ use App\Http\Requests\Solicitacoes\SolicitacaoTransferRequest;
 use App\Models\Solicitacao;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
@@ -25,6 +26,21 @@ class SolicitacoesController extends Controller
                 SolicitacaoStatus::APROVADA->value,
                 SolicitacaoStatus::REPROVADA->value,
             ])->latest('decidido_em')->latest()->get(),
+        ]);
+    }
+
+    public function recebidas(): View
+    {
+        Gate::authorize('viewAdminSetorDashboard', User::class);
+
+        $user = Auth::user();
+
+        return view('solicitacoes.recebidas', [
+            'solicitacoesRecebidas' => Solicitacao::query()
+                ->with('funcionario')
+                ->where('setor_destino_id', $user->setor_id)
+                ->latest()
+                ->get(),
         ]);
     }
 

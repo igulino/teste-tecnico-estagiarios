@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CargoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FuncionarioController;
+use App\Http\Controllers\HistoricoController;
 use App\Http\Controllers\SetorController;
 use App\Http\Controllers\SolicitacoesController;
 use Illuminate\Support\Facades\Route;
@@ -16,6 +17,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/super-admin', [DashboardController::class, 'superAdmin'])->name('dashboard.super-admin');
     Route::get('/dashboard/admin-setor', [DashboardController::class, 'adminSetor'])->name('dashboard.admin-setor');
+    Route::get('/historicos', [HistoricoController::class, 'index'])->name('historicos.index');
     
     Route::get('/setores/create', [SetorController::class, 'create'])->name('setores.create');
     Route::post('/setores', [SetorController::class, 'store'])->name('setores.store');
@@ -31,6 +33,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/funcionarios/{funcionario}', [FuncionarioController::class, 'destroy'])->name('funcionarios.destroy');
 
     Route::get('/solicitacoes', [SolicitacoesController::class, 'index'])->name('solicitacoes.index');
+    Route::get('/solicitacoes/recebidas', [SolicitacoesController::class, 'recebidas'])->name('solicitacoes.recebidas');
     Route::post('/solicitacoes/transferencia', [SolicitacoesController::class, 'storeTransferencia'])->name('solicitacoes.transferencia.store');
     Route::post('/solicitacoes/aumento', [SolicitacoesController::class, 'storeAumento'])->name('solicitacoes.aumento.store');
     Route::post('/solicitacoes/promocao', [SolicitacoesController::class, 'storePromocao'])->name('solicitacoes.promocao.store');

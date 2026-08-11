@@ -10,6 +10,7 @@ use App\Models\Solicitacao;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use RuntimeException;
 
 class SolicitacaoDecision
@@ -19,7 +20,13 @@ class SolicitacaoDecision
         Gate::forUser($actor)->authorize('create', Solicitacao::class);
 
         return DB::transaction(function () use ($actor, $data): Solicitacao {
-            $funcionario = Funcionario::query()->findOrFail($data['funcionario_id']);
+            $funcionario = Funcionario::query()->lockForUpdate()->findOrFail($data['funcionario_id']);
+
+            $this->garantirQueNaoExisteSolicitacaoPendente(
+                $funcionario,
+                SolicitacaoTipo::TRANSFERENCIA,
+                'Este funcionario ja possui uma transferencia pendente.',
+            );
 
             return Solicitacao::create([
                 'tipo' => SolicitacaoTipo::TRANSFERENCIA->value,
@@ -38,7 +45,13 @@ class SolicitacaoDecision
         Gate::forUser($actor)->authorize('create', Solicitacao::class);
 
         return DB::transaction(function () use ($actor, $data): Solicitacao {
-            $funcionario = Funcionario::query()->findOrFail($data['funcionario_id']);
+            $funcionario = Funcionario::query()->lockForUpdate()->findOrFail($data['funcionario_id']);
+
+            $this->garantirQueNaoExisteSolicitacaoPendente(
+                $funcionario,
+                SolicitacaoTipo::AUMENTO,
+                'Este funcionario ja possui um aumento salarial pendente.',
+            );
 
             return Solicitacao::create([
                 'tipo' => SolicitacaoTipo::AUMENTO->value,
@@ -58,7 +71,13 @@ class SolicitacaoDecision
         Gate::forUser($actor)->authorize('create', Solicitacao::class);
 
         return DB::transaction(function () use ($actor, $data): Solicitacao {
-            $funcionario = Funcionario::query()->findOrFail($data['funcionario_id']);
+            $funcionario = Funcionario::query()->lockForUpdate()->findOrFail($data['funcionario_id']);
+
+            $this->garantirQueNaoExisteSolicitacaoPendente(
+                $funcionario,
+                SolicitacaoTipo::PROMOCAO,
+                'Este funcionario ja possui uma mudanca de cargo pendente.',
+            );
 
             return Solicitacao::create([
                 'tipo' => SolicitacaoTipo::PROMOCAO->value,
@@ -76,7 +95,6 @@ class SolicitacaoDecision
     public function execute(User $actor, Solicitacao $solicitacao, string $justificativa): void
     {
         Gate::forUser($actor)->authorize('decide', $solicitacao);
-
         DB::transaction(function () use ($actor, $solicitacao, $justificativa) {
             $solicitacao = Solicitacao::query()->lockForUpdate()->findOrFail($solicitacao->id);
             
@@ -123,7 +141,6 @@ class SolicitacaoDecision
             if ($solicitacao->status !== SolicitacaoStatus::PENDENTE) {
                 throw new RuntimeException('Solicitacao ja decidida.');
             }
-
             $funcionario = Funcionario::query()->findOrFail($solicitacao->funcionario_id);
 
             $solicitacao->update([
@@ -202,6 +219,20 @@ class SolicitacaoDecision
             'setor_destino_id' => $solicitacao->setor_destino_id,
             'nome_funcionario_snapshot' => $funcionario->name,
         ]);
+    }
+
+    private function garantirQueNaoExisteSolicitacaoPendente(Funcionario $funcionario, SolicitacaoTipo $tipo, string $mensagem): void
+    {
+        $existeSolicitacaoPendente = Solicitacao::query()
+            ->where('tipo', $tipo->value)
+            ->where('status', SolicitacaoStatus::PENDENTE->value)
+            ->where('funcionario_id', $funcionario->id)->exists();
+
+        if ($existeSolicitacaoPendente) {
+            throw ValidationException::withMessages([
+                'funcionario_id' => $mensagem,
+            ]);
+        }
     }
 
     private function aplicarAumento(Solicitacao $solicitacao, User $actor): void
