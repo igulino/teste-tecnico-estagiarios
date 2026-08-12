@@ -125,7 +125,7 @@
                                                         </form>
                                                     </div>
 
-                                                    <form x-show="aberto" x-cloak method="POST" action="{{ route('funcionarios.transfer', $funcionario) }}" class="mt-3 flex flex-col gap-2 sm:flex-row">
+                                                    <form x-show="aberto" x-cloak x-on:click.stop method="POST" action="{{ route('funcionarios.transfer', $funcionario) }}" class="mt-3 flex flex-col gap-2 sm:flex-row">
                                                         @csrf
                                                         @method('PATCH')
 

@@ -27,8 +27,7 @@ class FuncionarioController extends Controller
         Gate::authorize('viewAdminSetorDashboard', User::class);
 
         return view('funcionarios.excluded', [
-            'funcionarios' => Funcionario::onlyTrashed()
-                ->with('cargo')
+            'funcionarios' => Funcionario::onlyTrashed()->with('cargo')
                 ->where('setor_id', $request->user()->setor_id)
                 ->orderByDesc('deleted_at')
                 ->get(),
