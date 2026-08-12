@@ -100,9 +100,7 @@ class SolicitacoesController extends Controller
             justificativa: 'Solicitacao recusada pelo admin de setor.',
         );
 
-        return redirect()
-            ->back()
-            ->with('success', 'Solicitacao recusada com sucesso.');
+        return redirect()->back()->with('success', 'Solicitacao recusada com sucesso.');
     }
 
     public function destroy(Solicitacao $solicitacao, SolicitacaoDecision $action): RedirectResponse
@@ -112,8 +110,6 @@ class SolicitacoesController extends Controller
             solicitacao: $solicitacao,
         );
 
-        return redirect()
-            ->back()
-            ->with('success', 'Solicitacao desfeita com sucesso.');
+        return redirect()->back()->with('success', 'Solicitacao desfeita com sucesso.');
     }
 }

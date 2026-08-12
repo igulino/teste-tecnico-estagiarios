@@ -7,11 +7,30 @@ use App\Http\Controllers\FuncionarioController;
 use App\Http\Controllers\HistoricoController;
 use App\Http\Controllers\SetorController;
 use App\Http\Controllers\SolicitacoesController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+use Illuminate\Support\Facades\Log;
 
 Route::get('/', function () {
     return redirect()->route('login');
 });
+
+Route::get('/debug-session', function (Request $request) {
+
+
+   // Log::info('app_url' . config('app.url'));
+    return [
+        'app_url' => config('app.url'),
+        'session_cookie' => config('session.cookie'),
+        'session_id' => $request->session()->getId(),
+        'auth_id' => auth()->id(),
+        'authenticated' => auth()->check(),
+        'via_remember' => auth()->viaRemember(),
+        'cookies_recebidos' => array_keys($request->cookies->all()),
+    ];
+});
+
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -40,6 +59,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/solicitacoes/{solicitacao}/aceitar', [SolicitacoesController::class, 'accept'])->name('solicitacoes.accept');
     Route::post('/solicitacoes/{solicitacao}/recusar', [SolicitacoesController::class, 'reject'])->name('solicitacoes.reject');
     Route::delete('/solicitacoes/{solicitacao}', [SolicitacoesController::class, 'destroy'])->name('solicitacoes.destroy');
+
+
+    
 });
 
 Route::middleware('auth')->group(function () {

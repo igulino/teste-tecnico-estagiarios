@@ -125,8 +125,8 @@
                                                         </form>
                                                     </div>
 
-                                                    <form x-show="aberto" x-cloak method="POST" action="{{ route('funcionarios.transfer', $funcionario) }}" class="mt-3 flex flex-col gap-2 sm:flex-row">
-                                                        @csrf
+                                                    <form x-show="aberto" x-cloak x-on:click.stop method="POST" action="{{ route('funcionarios.transfer', $funcionario) }}" class="mt-3 flex flex-col gap-2 sm:flex-row">
+                                                    @csrf
                                                         @method('PATCH')
 
                                                         <select name="setor_id" class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">

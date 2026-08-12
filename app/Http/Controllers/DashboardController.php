@@ -63,15 +63,8 @@ class DashboardController extends Controller
                 ->where('setor_origem_id', $user->setor_id)
                 ->pluck('funcionario_id')
                 ->all(),
-            'solicitacoesFeitas' => Solicitacao::query()
-                ->with('funcionario')
-                ->where('solicitado_por_user_id', $user->id)
-                ->latest()
-                ->get(),
-            'possuiSolicitacoesRecebidasPendentes' => Solicitacao::query()
-                ->where('setor_destino_id', $user->setor_id)
-                ->where('status', SolicitacaoStatus::PENDENTE->value)
-                ->exists(),
+            'solicitacoesFeitas' => Solicitacao::query()->with('funcionario')->where('solicitado_por_user_id', $user->id)->latest()->get(),
+            'possuiSolicitacoesRecebidasPendentes' => Solicitacao::query()->where('setor_destino_id', $user->setor_id)->where('status', SolicitacaoStatus::PENDENTE->value)->exists(),
             'totalFuncionarios' => Funcionario::query()->where('setor_id', $user->setor_id)->count(),
             'solicitacoesPendentes' => Solicitacao::query()->where('setor_aprovador_id', $user->setor_id)->where('status', 'pendente')->count(),
             'solicitacoesDecididas' => Solicitacao::query()->where('decidido_por_user_id', $user->id)->count(),
